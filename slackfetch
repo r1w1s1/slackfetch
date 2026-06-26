@@ -1,0 +1,228 @@
+#!/bin/sh
+#
+# Copyright 2025  r1w1s1
+# All rights reserved.
+#
+# Redistribution and use of this script, with or without modification, is
+# permitted provided that the following conditions are met:
+#
+# 1. Redistributions of this script must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
+# EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# slackfetch - minimal, truthful system info for Slackware
+#
+# Based on ufetch by J. Schillinger.
+# Window manager detection uses EWMH via xprop only (no guessing).
+# Non-EWMH window managers may set SLACKFETCH_WM manually.
+#
+# Usage:
+#   slackfetch
+#   NO_COLOR=1 slackfetch   # disable color output (https://no-color.org)
+
+## BASIC INFO
+
+host="$(uname -n)"; host="${host%%.*}"
+os="$(cat /etc/slackware-version 2>/dev/null)"
+kernel="$(uname -sr) ($(uname -m))"
+uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
+case "$uptime" in
+    *day*,*\ minute*|*days*,*\ minute*)
+        uptime="${uptime%, *}"
+        ;;
+esac
+
+libc=""
+for libc_file in /lib64/libc.so.6 /lib/libc.so.6; do
+    if [ -x "$libc_file" ]; then
+        libc_ver="$("$libc_file" 2>/dev/null \
+            | sed -n 's/^GNU C Library.* version \([0-9][0-9.]*[0-9]\).*/\1/p')"
+        if [ -n "$libc_ver" ]; then
+            libc="glibc $libc_ver"
+            break
+        fi
+    fi
+done
+
+## SHELL (pretty name)
+
+shell="${SHELL##*/}"
+case "$shell" in
+    bash) shell="GNU bash"
+          [ -n "$BASH_VERSION" ] && shell="$shell ${BASH_VERSION%%(*}" ;;
+    zsh)  shell="zsh"
+          [ -n "$ZSH_VERSION" ] && shell="$shell $ZSH_VERSION" ;;
+esac
+
+## MULTIPLEXER
+[ -n "$TMUX" ] && shell="$shell (tmux)"
+[ -n "$STY"  ] && shell="$shell (screen)"
+[ -n "$MTM"  ] && shell="$shell (mtm)"
+
+## EDITOR
+
+editor=""
+if [ -n "$EDITOR" ]; then
+    editor="${EDITOR%% *}"   # drop any arguments
+    editor="${editor##*/}"   # drop any leading path
+fi
+
+## DESKTOP MANAGER
+
+de="${XDG_CURRENT_DESKTOP##*:}"
+case "$de" in
+    KDE)
+        if command -v plasmashell >/dev/null 2>&1; then
+            ver="$(plasmashell --version 2>/dev/null | sed -n 's/.* \([0-9][0-9.]*\).*/\1/p')"
+            [ -n "$ver" ] && de="$de $ver"
+        fi ;;
+    XFCE)
+        if command -v xfce4-session >/dev/null 2>&1; then
+            ver="$(xfce4-session --version 2>/dev/null | sed -n '1s/^xfce4-session \([0-9.]*\).*/\1/p')"
+            [ -n "$ver" ] && de="$de $ver"
+        fi ;;
+esac
+
+## WINDOW MANAGER (strict)
+
+wm=""
+wm_server=""
+
+# User override (for twm, mwm, etc.)
+if [ -n "$SLACKFETCH_WM" ]; then
+    wm="$SLACKFETCH_WM"
+
+# EWMH via xprop (X11 only)
+elif [ -n "$DISPLAY" ] && command -v xprop >/dev/null 2>&1; then
+    wm_id="$(xprop -root _NET_SUPPORTING_WM_CHECK 2>/dev/null \
+        | awk '{print $5}')"
+    if [ -n "$wm_id" ] && [ "$wm_id" != "not" ]; then
+        wm="$(xprop -id "$wm_id" _NET_WM_NAME 2>/dev/null \
+            | sed -n 's/.*= "\(.*\)"/\1/p')"
+        [ -n "$wm" ] && wm_server="X11"
+    fi
+fi
+
+## DISPLAY SERVER
+
+display=""
+if [ -n "$WAYLAND_DISPLAY" ]; then
+    display="Wayland"
+elif [ -n "$DISPLAY" ]; then
+    xver="$(/usr/libexec/Xorg -version 2>&1)"
+    ver="$(printf '%s\n' "$xver" \
+        | sed -n 's/.*X Server \([0-9][0-9.]*\).*/\1/p')"
+    case "$xver" in
+        *XLibre*) display="XLibre" ;;
+        *X.Org*)  display="X.Org"  ;;
+        *)        display="X11"    ;;
+    esac
+    [ -n "$ver" ] && display="$display $ver"
+fi
+
+## OS AGE (days since root filesystem creation)
+
+os_age=""
+birth="$(stat -c %W / 2>/dev/null)"
+if [ -n "$birth" ] && [ "$birth" -gt 0 ] 2>/dev/null; then
+    os_age="$(( ($(date +%s) - birth) / 86400 ))d"
+fi
+[ -n "$os_age" ] && uptime="$uptime (age $os_age)"
+
+## Machine Model
+
+if [ -n "$SLACKFETCH_MODEL" ]; then
+    model="$SLACKFETCH_MODEL"
+else
+    sys_vendor="$(cat /sys/devices/virtual/dmi/id/sys_vendor 2>/dev/null)"
+    product_name="$(cat /sys/devices/virtual/dmi/id/product_name 2>/dev/null)"
+    product_version="$(cat /sys/devices/virtual/dmi/id/product_version 2>/dev/null)"
+    case "$sys_vendor" in
+        LENOVO) model="$product_version" ;;
+        Dell*)
+            case "$product_name" in
+                Dell*) model="$product_name" ;;
+                *)     model="Dell $product_name" ;;
+            esac ;;
+        *)      model="$product_name" ;;
+    esac
+    [ -n "$model" ] || model="$product_version"
+fi
+
+## PACKAGE COUNT
+
+packages=""
+if [ -d /var/log/packages ]; then
+    package_extra=""
+    flatpak=""
+    total="$(ls /var/log/packages 2>/dev/null | wc -l | tr -d ' ')"
+    sbo="$(ls /var/log/packages 2>/dev/null | grep '_SBo$' | wc -l | tr -d ' ')"
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak="$(flatpak list --app 2>/dev/null | wc -l | tr -d ' ')"
+    fi
+    [ -n "$total" ] && packages="$total"
+    [ -n "$sbo" ] && [ "$sbo" -gt 0 ] 2>/dev/null && package_extra="$sbo SBo"
+    if [ -n "$flatpak" ] && [ "$flatpak" -gt 0 ] 2>/dev/null; then
+        [ -n "$package_extra" ] && package_extra="$package_extra, "
+        package_extra="${package_extra}${flatpak} Flatpak"
+    fi
+    [ -n "$package_extra" ] && packages="$packages ($package_extra)"
+fi
+
+## COLORS
+if [ -z "$NO_COLOR" ] && command -v tput >/dev/null 2>&1; then
+    bold="$(tput bold)"
+    blue="$(tput setaf 4)"
+    reset="$(tput sgr0)"
+fi
+lc="${reset}${bold}${blue}"
+nc="${reset}${bold}${blue}"
+ic="${reset}"
+c0="${reset}${blue}"
+
+session=""
+session_extra=""
+if [ -n "$de" ]; then
+    session="${lc}de:        ${ic}${de}${reset}"
+    [ -n "$wm" ] && session_extra="
+${c0}                 ${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
+elif [ -n "$wm" ]; then
+    session="${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
+fi
+
+## OUTPUT
+
+cat <<EOF
+
+${c0}     ________    ${nc}${USER}${ic}@${nc}${host} (${model})${reset}
+${c0}    /  ______|   ${lc}os:        ${ic}${os}${reset}
+${c0}    | |______    ${lc}kernel:    ${ic}${kernel}${reset}
+${c0}    \\______  \\   ${libc:+${lc}libc:      ${ic}${libc}${reset}}
+${c0}     ______| |   ${lc}uptime:    ${ic}${uptime}${reset}
+${c0}  | |________/   ${lc}shell:     ${ic}${shell}${reset}
+${c0}  |____________  ${packages:+${lc}pkgs:      ${ic}${packages}${reset}}
+${c0}                 ${session}${session_extra}
+
+EOF
+
+# Ensure terminal colors are fully reset
+[ -n "$reset" ] && printf '%s' "$reset"
+
+# Color palette aligned with labels
+if [ -z "$NO_COLOR" ]; then
+    printf '               '
+    for i in 0 1 2 3 4 5 6 7; do
+        printf '\033[4%dm \033[0m' "$i"
+    done
+    printf '\n\n'
+fi

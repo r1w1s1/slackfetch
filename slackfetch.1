@@ -1,0 +1,184 @@
+.Dd June 26, 2026
+.Dt SLACKFETCH 1
+.Os
+.Sh NAME
+.Nm slackfetch
+.Nd minimal system information utility for Slackware
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+displays a small set of system information relevant to a
+Slackware Linux system.
+Only information that can be determined reliably is shown.
+.Pp
+Desktop environment and window manager fields are omitted
+when they cannot be determined.
+.Sh INSTALLATION
+Local installation:
+.Bd -literal -offset indent
+install -m 0755 slackfetch ~/.local/bin/slackfetch
+.Ed
+.Pp
+System-wide installation:
+.Bd -literal -offset indent
+install -m 0755 slackfetch /usr/bin/slackfetch
+.Ed
+.Sh EXAMPLES
+Window manager only (dwm):
+.Bd -literal -offset indent
+$ slackfetch
+     ________    r1w1s1@RachaelTyrell (ThinkPad T14 Gen 2i)
+    /  ______|   os:        Slackware 15.0+
+    | |______    kernel:    Linux 7.0.12 (x86_64)
+    \e______  \e   libc:      glibc 2.42
+     ______| |   uptime:    1 hour, 57 minutes (age 394d)
+  | |________/   shell:     GNU bash 5.3.15 (tmux)
+  |____________  pkgs:      1297 (63 SBo, 12 Flatpak)
+                 wm:        dwm (XLibre 1.25.1)
+.Ed
+.Pp
+Desktop environment (KDE):
+.Bd -literal -offset indent
+$ slackfetch
+     ________    r1w1s1@x220 (ThinkPad X220)
+    /  ______|   os:        Slackware 15.0+
+    | |______    kernel:    Linux 7.1.0 (x86_64)
+    \e______  \e   libc:      glibc 2.42
+     ______| |   uptime:    42 minutes (age 394d)
+  | |________/   shell:     GNU bash
+  |____________  pkgs:      1297 (63 SBo)
+                 de:        KDE 6.4.0
+                 wm:        KWin (Wayland)
+.Ed
+.Pp
+Disable colored output:
+.Bd -literal -offset indent
+$ NO_COLOR=1 slackfetch
+.Ed
+.Pp
+Override window manager detection:
+.Bd -literal -offset indent
+$ SLACKFETCH_WM="dwm 6.8" slackfetch
+.Ed
+.Pp
+Override machine model:
+.Bd -literal -offset indent
+$ SLACKFETCH_MODEL="QEMU" slackfetch
+.Ed
+.Sh ENVIRONMENT
+.Bl -tag -width SLACKFETCH_MODEL
+.It Ev SLACKFETCH_WM
+Override window manager detection.
+This is primarily intended for non-EWMH window managers such as
+.Xr twm 1 ,
+.Xr ctwm 1 ,
+or
+.Xr mwm 1 .
+The value is shown verbatim.
+.Pp
+Example:
+.Bd -literal -offset indent
+SLACKFETCH_WM="dwm 6.8" slackfetch
+.Ed
+.It Ev SLACKFETCH_MODEL
+Override machine model detection.
+The value is shown verbatim.
+.Pp
+Example:
+.Bd -literal -offset indent
+SLACKFETCH_MODEL="QEMU" slackfetch
+.Ed
+.It Ev NO_COLOR
+Disable colored output according to the
+.Lk https://no-color.org NO_COLOR
+convention.
+.El
+.Sh FILES
+.Bl -tag -width /etc/slackware-version
+.It Pa /etc/slackware-version
+Slackware version string.
+.It Pa /var/log/packages
+Installed package database used for the
+.Dq pkgs:
+field.
+.It Pa /lib64/libc.so.6 , Pa /lib/libc.so.6
+glibc version used for the
+.Dq libc:
+field.
+.It Pa /sys/devices/virtual/dmi/id/sys_vendor
+Machine vendor used for model selection.
+.It Pa /sys/devices/virtual/dmi/id/product_name
+Machine model information when available.
+.It Pa /sys/devices/virtual/dmi/id/product_version
+Fallback machine model information.
+.El
+.Sh NOTES
+Window manager detection relies on the EWMH
+.Dv _NET_WM_NAME
+property via
+.Xr xprop 1
+when running under X11.
+Non-EWMH window managers may be specified using
+.Ev SLACKFETCH_WM .
+The
+.Dq age
+value is shown in the
+.Dq uptime:
+field when the root filesystem creation time can be read.
+The
+.Dq libc:
+field is shown when glibc can be read from
+.Pa /lib64/libc.so.6
+or
+.Pa /lib/libc.so.6 .
+The
+.Dq pkgs:
+field is shown when
+.Pa /var/log/packages
+is available.
+Packages ending in
+.Dq _SBo
+are counted as SlackBuilds.org packages.
+Flatpak applications are counted when the flatpak command is installed.
+.Pp
+The
+.Dq de:
+field is shown only when
+.Ev XDG_CURRENT_DESKTOP
+is present.
+KDE and XFCE include a version when it can be read from their own tools.
+The
+.Dq wm:
+field is shown only when a window manager can be determined.
+Under Wayland,
+.Nm
+reports
+.Dq Wayland
+when
+.Ev WAYLAND_DISPLAY
+is present.
+.Pp
+To add better model detection for another machine vendor, report the output of:
+.Bd -literal -offset indent
+cat /sys/devices/virtual/dmi/id/sys_vendor
+cat /sys/devices/virtual/dmi/id/product_name
+cat /sys/devices/virtual/dmi/id/product_version
+.Ed
+.Pp
+Also include the model name that should be displayed.
+Do not send serial numbers, UUIDs, or other unique machine identifiers.
+.Sh SEE ALSO
+.Xr uname 1 ,
+.Xr uptime 1 ,
+.Xr xprop 1
+.Sh AUTHORS
+.An Ricardson Williams Aq Mt r1w1s1@fastmail.com
+.Pp
+Derived from
+.Nm ufetch
+by J. Schillinger.
+.Sh LICENSE
+This project follows the same BSD license terms as the original
+.Nm ufetch
+project.
