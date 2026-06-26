@@ -23,27 +23,27 @@ INSTALLATION
 EXAMPLES
      Window manager only (dwm):
 
-            $ slackfetch
-                 ________    r1w1s1@RachaelTyrell (ThinkPad T14 Gen 2i)
-                /  ______|   os:        Slackware 15.0+
-                | |______    kernel:    Linux 7.0.12 (x86_64)
-                \______  \   libc:      glibc 2.42
-                 ______| |   uptime:    1 hour, 57 minutes (age 394d)
-              | |________/   shell:     GNU bash 5.3.15 (tmux)
-              |____________  pkgs:      1297 (63 SBo, 12 Flatpak)
-                             wm:        dwm (XLibre 1.25.1)
+           $ slackfetch
+                ________    r1w1s1@RachaelTyrell (ThinkPad T14 Gen 2i)
+               /  ______|   os:        Slackware 15.0+
+               | |______    kernel:    Linux 7.0.12 (x86_64)
+               \______  \   libc:      glibc 2.42
+                ______| |   uptime:    1 hour, 57 minutes (age 394d)
+             | |________/   shell:     GNU bash 5.3.15 (tmux)
+             |____________  pkgs:      1297 (63 SBo, 12 Flatpak)
+                            wm:        dwm (XLibre 1.25.1)
 
      Desktop environment (KDE):
 
-            $ slackfetch
-                 ________    r1w1s1@x220 (ThinkPad X220)
-                /  ______|   os:        Slackware 15.0+
-                | |______    kernel:    Linux 7.1.0 (x86_64)
-                \______  \   libc:      glibc 2.42
-                 ______| |   uptime:    42 minutes (age 394d)
-              | |________/   shell:     GNU bash
-              |____________  pkgs:      1297 (63 SBo)
-                             de:        KDE 6.4.0
+           $ slackfetch
+                ________    r1w1s1@x220 (ThinkPad X220)
+               /  ______|   os:        Slackware 15.0+
+               | |______    kernel:    Linux 7.1.0 (x86_64)
+               \______  \   libc:      glibc 2.42
+                ______| |   uptime:    42 minutes (age 394d)
+             | |________/   shell:     GNU bash
+             |____________  pkgs:      1297 (63 SBo)
+                            de:        KDE 6.4.0
                             wm:        KWin (Wayland)
 
      Disable colored output:
@@ -78,8 +78,8 @@ FILES
 
      /var/log/packages       Installed package database used for the “pkgs:” field.
 
-     /lib64/libc.so.6
-     /lib/libc.so.6          glibc version used for the “libc:” field.
+     /lib64/libc.so.6, /lib/libc.so.6
+                             glibc version used for the “libc:” field.
 
      /sys/devices/virtual/dmi/id/sys_vendor
                              Machine vendor used for model selection.
@@ -92,9 +92,10 @@ FILES
 
 NOTES
      Window  manager  detection  relies  on  the  EWMH  _NET_WM_NAME property via xprop(1) when running under X11.  Non-EWMH window managers may be specified using SLACKFETCH_WM.  The “age” value is shown in the
-     “uptime:” field when the root filesystem creation time can be read.  The “libc:” field is shown when glibc can be read from /lib64/libc.so.6 or /lib/libc.so.6.  The “pkgs:” field is shown when /var/log/packages is available.  Packages ending in “_SBo” are counted as SlackBuilds.org packages.  Flatpak applications are counted when flatpak(1) is installed.
+     “uptime:” field when the root filesystem creation time can be read.  The “libc:” field is shown when  glibc  can  be  read  from  /lib64/libc.so.6  or  /lib/libc.so.6.   The  “pkgs:”  field  is  shown  when
+     /var/log/packages is available.  Packages ending in “_SBo” are counted as SlackBuilds.org packages.  Flatpak applications are counted when the flatpak command is installed.
 
-     The “de:” field is shown only when XDG_CURRENT_DESKTOP is present.  KDE and XFCE include a version when it can be read from their own tools.  The “wm:” field is shown only when a window manager can  be  de‐
+     The  “de:”  field is shown only when XDG_CURRENT_DESKTOP is present.  KDE and XFCE include a version when it can be read from their own tools.  The “wm:” field is shown only when a window manager can be de‐
      termined.  Under Wayland, slackfetch reports “Wayland” when WAYLAND_DISPLAY is present.
 
      To add better model detection for another machine vendor, report the output of:
@@ -116,4 +117,4 @@ AUTHORS
 LICENSE
      This project follows the same BSD license terms as the original ufetch project.
 
-GNU                                                                                                June 25, 2026                                                                                      SLACKFETCH(1)
+GNU                                                                                                June 26, 2026                                                                                      SLACKFETCH(1)
