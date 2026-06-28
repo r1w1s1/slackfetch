@@ -130,10 +130,10 @@ elif [ -n "$DISPLAY" ]; then
     [ -n "$ver" ] && display="$display $ver"
 fi
 
-## OS AGE (days since root filesystem creation)
+## OS AGE (days since Slackware installation)
 
 os_age=""
-birth="$(stat -c %W / 2>/dev/null)"
+birth="$(stat -c %Y /var/lib/pkgtools/packages/aaa_base-* 2>/dev/null | head -1)"
 if [ -n "$birth" ] && [ "$birth" -gt 0 ] 2>/dev/null; then
     os_age="$(( ($(date +%s) - birth) / 86400 ))d"
 fi
