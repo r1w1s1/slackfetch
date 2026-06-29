@@ -25,7 +25,7 @@ EXAMPLES
 
            $ slackfetch
                 ________    r1w1s1@RachaelTyrell (ThinkPad T14 Gen 2i)
-               /  ______|   os:        Slackware 15.0+
+               /  ______|   os:        Slackware 15.0+ (-current)
                | |______    kernel:    Linux 7.0.12 (x86_64)
                \______  \   libc:      glibc 2.42
                 ______| |   uptime:    1 hour, 57 minutes (age 394d)
@@ -37,7 +37,7 @@ EXAMPLES
 
            $ slackfetch
                 ________    r1w1s1@x220 (ThinkPad X220)
-               /  ______|   os:        Slackware 15.0+
+               /  ______|   os:        Slackware 15.0+ (-current)
                | |______    kernel:    Linux 7.1.0 (x86_64)
                \______  \   libc:      glibc 2.42
                 ______| |   uptime:    42 minutes (age 394d)

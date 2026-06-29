@@ -33,7 +33,6 @@
 ## BASIC INFO
 
 host="$(uname -n)"; host="${host%%.*}"
-os="$(cat /etc/slackware-version 2>/dev/null)"
 kernel="$(uname -sr) ($(uname -m))"
 uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
 case "$uptime" in
@@ -54,6 +53,15 @@ for libc_file in /lib64/libc.so.6 /lib/libc.so.6; do
     fi
 done
 
+## OS
+
+os="$(cat /etc/slackware-version 2>/dev/null)"
+
+if [ -r /etc/os-release ]; then
+    codename="$(sed -n 's/^VERSION_CODENAME=//p' /etc/os-release)"
+    [ "$codename" = "current" ] && os="$os (-current)"
+fi
+
 ## SHELL (pretty name)
 
 shell="${SHELL##*/}"
@@ -68,14 +76,6 @@ esac
 [ -n "$TMUX" ] && shell="$shell (tmux)"
 [ -n "$STY"  ] && shell="$shell (screen)"
 [ -n "$MTM"  ] && shell="$shell (mtm)"
-
-## EDITOR
-
-editor=""
-if [ -n "$EDITOR" ]; then
-    editor="${EDITOR%% *}"   # drop any arguments
-    editor="${editor##*/}"   # drop any leading path
-fi
 
 ## DESKTOP MANAGER
 
