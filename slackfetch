@@ -66,8 +66,7 @@ fi
 
 shell="${SHELL##*/}"
 case "$shell" in
-    bash) shell="GNU bash"
-          [ -n "$BASH_VERSION" ] && shell="$shell ${BASH_VERSION%%(*}" ;;
+    bash) [ -n "$BASH_VERSION" ] && shell="$shell ${BASH_VERSION%%(*}" ;;
     zsh)  shell="zsh"
           [ -n "$ZSH_VERSION" ] && shell="$shell $ZSH_VERSION" ;;
 esac
@@ -93,6 +92,8 @@ case "$de" in
         fi ;;
 esac
 
+[ -n "$de" ] && de="$(printf '%s\n' "$de" | tr '[:upper:]' '[:lower:]')"
+
 ## WINDOW MANAGER (strict)
 
 wm=""
@@ -112,6 +113,8 @@ elif [ -n "$DISPLAY" ] && command -v xprop >/dev/null 2>&1; then
         [ -n "$wm" ] && wm_server="X11"
     fi
 fi
+
+[ -n "$wm" ] && wm="$(printf '%s\n' "$wm" | tr '[:upper:]' '[:lower:]')"
 
 ## DISPLAY SERVER
 
@@ -180,6 +183,7 @@ if [ -d /var/log/packages ]; then
 fi
 
 ## COLORS
+
 if [ -z "$NO_COLOR" ] && command -v tput >/dev/null 2>&1; then
     bold="$(tput bold)"
     blue="$(tput setaf 4)"
@@ -190,6 +194,8 @@ nc="${reset}${bold}${blue}"
 ic="${reset}"
 c0="${reset}${blue}"
 
+## OUTPUT
+
 session=""
 session_extra=""
 if [ -n "$de" ]; then
@@ -199,8 +205,6 @@ ${c0}                 ${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
 elif [ -n "$wm" ]; then
     session="${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
 fi
-
-## OUTPUT
 
 cat <<EOF
 

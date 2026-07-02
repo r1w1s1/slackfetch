@@ -9,6 +9,9 @@ SYNOPSIS
 DESCRIPTION
      slackfetch displays a small set of system information relevant to a Slackware Linux system.  Only information that can be determined reliably is shown.
 
+     slackfetch  intentionally reports only core characteristics of a Slackware system, favoring clarity, consistency, and truthful output over exhaustive inventories.  It aims to remain simple, fast, and POSIX-
+     compliant.
+
      Desktop environment and window manager fields are omitted when they cannot be determined.
 
 INSTALLATION
@@ -29,11 +32,11 @@ EXAMPLES
                | |______    kernel:    Linux 7.0.12 (x86_64)
                \______  \   libc:      glibc 2.42
                 ______| |   uptime:    1 hour, 57 minutes (age 394d)
-             | |________/   shell:     GNU bash 5.3.15 (tmux)
+             | |________/   shell:     bash 5.3.15 (tmux)
              |____________  pkgs:      1297 (63 SBo, 12 Flatpak)
                             wm:        dwm (XLibre 1.25.1)
 
-     Desktop environment (KDE):
+     Desktop environment (kde):
 
            $ slackfetch
                 ________    r1w1s1@x220 (ThinkPad X220)
@@ -41,10 +44,10 @@ EXAMPLES
                | |______    kernel:    Linux 7.1.0 (x86_64)
                \______  \   libc:      glibc 2.42
                 ______| |   uptime:    42 minutes (age 394d)
-             | |________/   shell:     GNU bash
+             | |________/   shell:     bash
              |____________  pkgs:      1297 (63 SBo)
-                            de:        KDE 6.4.0
-                            wm:        KWin (Wayland)
+                            de:        kde 6.4.0
+                            wm:        kwin (Wayland)
 
      Disable colored output:
 
@@ -59,7 +62,7 @@ EXAMPLES
            $ SLACKFETCH_MODEL="QEMU" slackfetch
 
 ENVIRONMENT
-     SLACKFETCH_WM     Override window manager detection.  This is primarily intended for non-EWMH window managers such as twm(1), ctwm(1), or mwm(1).  The value is shown verbatim.
+     SLACKFETCH_WM     Override window manager detection.  This is primarily intended for non-EWMH window managers such as twm(1), ctwm(1), or mwm(1).  Window manager names are shown lowercase.
 
                        Example:
 
@@ -91,12 +94,12 @@ FILES
                              Fallback machine model information.
 
 NOTES
-     Window  manager  detection  relies  on  the  EWMH  _NET_WM_NAME property via xprop(1) when running under X11.  Non-EWMH window managers may be specified using SLACKFETCH_WM.  The “age” value is shown in the
-     “uptime:” field based on the installation time of aaa_base package.  The “libc:” field is shown when  glibc  can  be  read  from  /lib64/libc.so.6  or  /lib/libc.so.6.   The  “pkgs:”  field  is  shown  when
+     Window manager detection relies on the EWMH _NET_WM_NAME property via xprop(1) when running under X11.  Non-EWMH window managers may be specified using SLACKFETCH_WM.   The  “age”  value  is  shown  in  the
+     “uptime:”  field  based  on  the  installation  time  of  aaa_base  package.   The  “libc:”  field  is  shown when glibc can be read from /lib64/libc.so.6 or /lib/libc.so.6.  The “pkgs:” field is shown when
      /var/log/packages is available.  Packages ending in “_SBo” are counted as SlackBuilds.org packages.  Flatpak applications are counted when the flatpak command is installed.
 
-     The  “de:”  field is shown only when XDG_CURRENT_DESKTOP is present.  KDE and XFCE include a version when it can be read from their own tools.  The “wm:” field is shown only when a window manager can be de‐
-     termined.  Under Wayland, slackfetch reports “Wayland” when WAYLAND_DISPLAY is present.
+     The “de:” field is shown only when XDG_CURRENT_DESKTOP is present.  KDE and XFCE include a version when it can be read from their own tools.  Desktop environment and window manager names  are  shown  lower‐
+     case.  The “wm:” field is shown only when a window manager can be determined.  Under Wayland, slackfetch reports “Wayland” when WAYLAND_DISPLAY is present.
 
      To add better model detection for another machine vendor, report the output of:
 

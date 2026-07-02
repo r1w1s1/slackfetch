@@ -1,6 +1,6 @@
 .Dd June 26, 2026
 .Dt SLACKFETCH 1
-.Os
+.Os Slackware
 .Sh NAME
 .Nm slackfetch
 .Nd minimal system information utility for Slackware
@@ -11,6 +11,11 @@
 displays a small set of system information relevant to a
 Slackware Linux system.
 Only information that can be determined reliably is shown.
+.Pp
+.Nm
+intentionally reports only core characteristics of a Slackware system,
+favoring clarity, consistency, and truthful output over exhaustive inventories.
+It aims to remain simple, fast, and POSIX-compliant.
 .Pp
 Desktop environment and window manager fields are omitted
 when they cannot be determined.
@@ -33,12 +38,12 @@ $ slackfetch
     | |______    kernel:    Linux 7.0.12 (x86_64)
     \e______  \e   libc:      glibc 2.42
      ______| |   uptime:    1 hour, 57 minutes (age 394d)
-  | |________/   shell:     GNU bash 5.3.15 (tmux)
+  | |________/   shell:     bash 5.3.15 (tmux)
   |____________  pkgs:      1297 (63 SBo, 12 Flatpak)
                  wm:        dwm (XLibre 1.25.1)
 .Ed
 .Pp
-Desktop environment (KDE):
+Desktop environment (kde):
 .Bd -literal -offset indent
 $ slackfetch
      ________    r1w1s1@x220 (ThinkPad X220)
@@ -46,10 +51,10 @@ $ slackfetch
     | |______    kernel:    Linux 7.1.0 (x86_64)
     \e______  \e   libc:      glibc 2.42
      ______| |   uptime:    42 minutes (age 394d)
-  | |________/   shell:     GNU bash
+  | |________/   shell:     bash
   |____________  pkgs:      1297 (63 SBo)
-                 de:        KDE 6.4.0
-                 wm:        KWin (Wayland)
+                 de:        kde 6.4.0
+                 wm:        kwin (Wayland)
 .Ed
 .Pp
 Disable colored output:
@@ -75,7 +80,7 @@ This is primarily intended for non-EWMH window managers such as
 .Xr ctwm 1 ,
 or
 .Xr mwm 1 .
-The value is shown verbatim.
+Window manager names are shown lowercase.
 .Pp
 Example:
 .Bd -literal -offset indent
@@ -150,6 +155,7 @@ field is shown only when
 .Ev XDG_CURRENT_DESKTOP
 is present.
 KDE and XFCE include a version when it can be read from their own tools.
+Desktop environment and window manager names are shown lowercase.
 The
 .Dq wm:
 field is shown only when a window manager can be determined.
