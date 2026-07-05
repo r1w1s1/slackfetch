@@ -189,10 +189,10 @@ if [ -z "$NO_COLOR" ] && command -v tput >/dev/null 2>&1; then
     blue="$(tput setaf 4)"
     reset="$(tput sgr0)"
 fi
-lc="${reset}${bold}${blue}"
-nc="${reset}${bold}${blue}"
-ic="${reset}"
-c0="${reset}${blue}"
+lc="${reset}${bold}${blue}"     # labels
+nc="${reset}${bold}"            # header
+ic="${reset}"                   # values
+c0="${reset}${bold}${blue}"     # logo
 
 ## OUTPUT
 
