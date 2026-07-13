@@ -170,11 +170,16 @@ if [ -d /var/log/packages ]; then
     flatpak=""
     total="$(ls /var/log/packages 2>/dev/null | wc -l | tr -d ' ')"
     sbo="$(ls /var/log/packages 2>/dev/null | grep '_SBo$' | wc -l | tr -d ' ')"
+    unofficial="$(ls /var/log/packages 2>/dev/null | grep -vE '(-[0-9]+|_SBo)$' | wc -l | tr -d ' ')"
     if command -v flatpak >/dev/null 2>&1; then
         flatpak="$(flatpak list --app 2>/dev/null | wc -l | tr -d ' ')"
     fi
     [ -n "$total" ] && packages="$total"
     [ -n "$sbo" ] && [ "$sbo" -gt 0 ] 2>/dev/null && package_extra="$sbo SBo"
+    if [ -n "$unofficial" ] && [ "$unofficial" -gt 0 ] 2>/dev/null; then
+        [ -n "$package_extra" ] && package_extra="$package_extra, "
+        package_extra="${package_extra}${unofficial} unofficial"
+    fi
     if [ -n "$flatpak" ] && [ "$flatpak" -gt 0 ] 2>/dev/null; then
         [ -n "$package_extra" ] && package_extra="$package_extra, "
         package_extra="${package_extra}${flatpak} Flatpak"

@@ -39,7 +39,7 @@ $ slackfetch
     \e______  \e   libc:      glibc 2.42
      ______| |   uptime:    1 hour, 57 minutes (age 394d)
   | |________/   shell:     bash 5.3.15 (tmux)
-  |____________  pkgs:      1297 (63 SBo, 12 Flatpak)
+  |____________  pkgs:      1297 (63 SBo, 12 unofficial, 12 Flatpak)
                  wm:        dwm (XLibre 1.25.1)
 .Ed
 .Pp
@@ -147,6 +147,9 @@ is available.
 Packages ending in
 .Dq _SBo
 are counted as SlackBuilds.org packages.
+Packages not ending in a numeric build tag or
+.Dq _SBo
+are counted as unofficial packages.
 Flatpak applications are counted when the flatpak command is installed.
 .Pp
 The
