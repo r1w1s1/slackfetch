@@ -36,7 +36,7 @@ $ slackfetch
      ________    r1w1s1@RachaelTyrell (ThinkPad T14 Gen 2i)
     /  ______|   os:        Slackware 15.0+ (-current)
     | |______    kernel:    Linux 7.0.12 (x86_64)
-    \e______  \e   libc:      glibc 2.42
+    \e______  \e   libc:      glibc 2.42 (sysvinit 3.18)
      ______| |   uptime:    1 hour, 57 minutes (age 394d)
   | |________/   shell:     bash 5.3.15 (tmux)
   |____________  pkgs:      1297 (63 SBo, 12 unofficial, 12 Flatpak)
@@ -49,7 +49,7 @@ $ slackfetch
      ________    r1w1s1@x220 (ThinkPad X220)
     /  ______|   os:        Slackware 15.0+ (-current)
     | |______    kernel:    Linux 7.1.0 (x86_64)
-    \e______  \e   libc:      glibc 2.42
+    \e______  \e   libc:      glibc 2.42 (sysvinit 3.18)
      ______| |   uptime:    42 minutes (age 394d)
   | |________/   shell:     bash
   |____________  pkgs:      1297 (63 SBo)
@@ -110,7 +110,7 @@ field.
 .It Pa /lib64/libc.so.6 , Pa /lib/libc.so.6
 glibc version used for the
 .Dq libc:
-field.
+field. The sysvinit version is appended when available.
 .It Pa /sys/devices/virtual/dmi/id/sys_vendor
 Machine vendor used for model selection.
 .It Pa /sys/devices/virtual/dmi/id/product_name
@@ -152,6 +152,11 @@ Packages not ending in a numeric build tag or
 are counted as unofficial packages.
 Flatpak applications are counted when the flatpak command is installed.
 .Pp
+When available, the sysvinit version is appended to the
+.Dq libc:
+field. It is read from
+.Pa /sbin/init --version .
+.Pp
 The
 .Dq de:
 field is shown only when
@@ -184,7 +189,7 @@ Do not send serial numbers, UUIDs, or other unique machine identifiers.
 .Xr uptime 1 ,
 .Xr xprop 1
 .Sh AUTHORS
-.An Ricardson Williams Aq Mt r1w1s1@fastmail.com
+.An Ricardson Williams Aq Mt ricardsonwilliams@gmail.com
 .Pp
 Derived from
 .Nm ufetch

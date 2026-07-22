@@ -53,6 +53,13 @@ for libc_file in /lib64/libc.so.6 /lib/libc.so.6; do
     fi
 done
 
+init_ver=""
+if [ -x /sbin/init ]; then
+    init_ver="$(/sbin/init --version 2>/dev/null \
+        | sed -n 's/^SysV init version: /sysvinit /p')"
+fi
+[ -n "$libc" ] && [ -n "$init_ver" ] && libc="$libc ($init_ver)"
+
 ## OS
 
 os="$(cat /etc/slackware-version 2>/dev/null)"

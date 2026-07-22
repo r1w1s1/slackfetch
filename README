@@ -30,7 +30,7 @@ EXAMPLES
                 ________    r1w1s1@RachaelTyrell (ThinkPad T14 Gen 2i)
                /  ______|   os:        Slackware 15.0+ (-current)
                | |______    kernel:    Linux 7.0.12 (x86_64)
-               \______  \   libc:      glibc 2.42
+               \______  \   libc:      glibc 2.42 (sysvinit 3.18)
                 ______| |   uptime:    1 hour, 57 minutes (age 394d)
              | |________/   shell:     bash 5.3.15 (tmux)
              |____________  pkgs:      1297 (63 SBo, 12 unofficial, 12 Flatpak)
@@ -42,7 +42,7 @@ EXAMPLES
                 ________    r1w1s1@x220 (ThinkPad X220)
                /  ______|   os:        Slackware 15.0+ (-current)
                | |______    kernel:    Linux 7.1.0 (x86_64)
-               \______  \   libc:      glibc 2.42
+               \______  \   libc:      glibc 2.42 (sysvinit 3.18)
                 ______| |   uptime:    42 minutes (age 394d)
              | |________/   shell:     bash
              |____________  pkgs:      1297 (63 SBo)
@@ -82,7 +82,7 @@ FILES
      /var/log/packages       Installed package database used for the “pkgs:” field.
 
      /lib64/libc.so.6, /lib/libc.so.6
-                             glibc version used for the “libc:” field.
+                             glibc version used for the “libc:” field. The sysvinit version is appended when available.
 
      /sys/devices/virtual/dmi/id/sys_vendor
                              Machine vendor used for model selection.
@@ -99,6 +99,8 @@ NOTES
      /var/log/packages is available.  Packages ending in “_SBo” are counted as SlackBuilds.org packages.  Packages not ending in a numeric build tag or “_SBo” are counted as unofficial packages.  Flatpak  ap‐
      plications are counted when the flatpak command is installed.
 
+     When available, the sysvinit version is appended to the “libc:” field. It is read from /sbin/init --version.
+
      The “de:” field is shown only when XDG_CURRENT_DESKTOP is present.  KDE and XFCE include a version when it can be read from their own tools.  Desktop environment and window manager names are shown lower‐
      case.  The “wm:” field is shown only when a window manager can be determined.  Under Wayland, slackfetch reports “Wayland” when WAYLAND_DISPLAY is present.
 
@@ -114,7 +116,7 @@ SEE ALSO
      uname(1), uptime(1), xprop(1)
 
 AUTHORS
-     Ricardson Williams <r1w1s1@fastmail.com>
+     Ricardson Williams <ricardsonwilliams@gmail.com>
 
      Derived from ufetch by J. Schillinger.
 
