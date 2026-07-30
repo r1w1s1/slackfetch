@@ -34,6 +34,22 @@
 
 host="$(uname -n)"; host="${host%%.*}"
 kernel="$(uname -sr) ($(uname -m))"
+cpu="$(awk -F ': ' '
+    /^model name/ {
+        cpu = $2
+        gsub(/\(R\)|\(TM\)/, "", cpu)
+        sub(/^[0-9]+(st|nd|rd|th) Gen /, "", cpu)
+        sub(/( CPU)? @.*/, "", cpu)
+        gsub(/[[:space:]]+/, " ", cpu)
+        sub(/^ /, "", cpu)
+        print cpu
+        exit
+    }
+' /proc/cpuinfo 2>/dev/null)"
+memory="$(awk '/^MemTotal:/ { printf "%.1f GiB", $2 / 1048576; exit }' \
+    /proc/meminfo 2>/dev/null)"
+hardware="$cpu"
+[ -n "$memory" ] && hardware="$hardware (mem: $memory)"
 uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
 case "$uptime" in
     *day*,*\ minute*|*days*,*\ minute*)
@@ -101,7 +117,7 @@ esac
 
 [ -n "$de" ] && de="$(printf '%s\n' "$de" | tr '[:upper:]' '[:lower:]')"
 
-## WINDOW MANAGER (strict)
+## WINDOW MANAGER
 
 wm=""
 wm_server=""
@@ -218,11 +234,16 @@ elif [ -n "$wm" ]; then
     session="${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
 fi
 
+header="${USER}@${host} (${model})"
+rule="$(printf '%*s' "${#header}" '' | tr ' ' '-')"
+
 cat <<EOF
 
-${c0}     ________    ${nc}${USER}${ic}@${nc}${host} (${model})${reset}
-${c0}    /  ______|   ${lc}os:        ${ic}${os}${reset}
-${c0}    | |______    ${lc}kernel:    ${ic}${kernel}${reset}
+${c0}                 ${nc}${header}${reset}
+${c0}                 ${rule}${reset}
+${c0}     ________    ${lc}os:        ${ic}${os}${reset}
+${c0}    /  ______|   ${lc}kernel:    ${ic}${kernel}${reset}
+${c0}    | |______    ${hardware:+${lc}hardware:  ${ic}${hardware}${reset}}
 ${c0}    \\______  \\   ${libc:+${lc}libc:      ${ic}${libc}${reset}}
 ${c0}     ______| |   ${lc}uptime:    ${ic}${uptime}${reset}
 ${c0}  | |________/   ${lc}shell:     ${ic}${shell}${reset}
