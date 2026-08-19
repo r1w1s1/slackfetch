@@ -28,7 +28,18 @@
 #
 # Usage:
 #   slackfetch
+#   slackfetch -m             # minimal output
 #   NO_COLOR=1 slackfetch   # disable color output (https://no-color.org)
+
+minimal=0
+case "${1-}" in
+    "") ;;
+    -m) minimal=1 ;;
+    *)
+        printf 'usage: %s [-m]\n' "${0##*/}" >&2
+        exit 1
+        ;;
+esac
 
 ## BASIC INFO
 
@@ -56,6 +67,7 @@ case "$uptime" in
         uptime="${uptime%, *}"
         ;;
 esac
+uptime_minimal="$uptime"
 
 libc=""
 for libc_file in /lib64/libc.so.6 /lib/libc.so.6; do
@@ -210,6 +222,17 @@ if [ -d /var/log/packages ]; then
     [ -n "$package_extra" ] && packages="$packages ($package_extra)"
 fi
 
+## FONT
+font="$SLACKFETCH_FONT"
+if [ -z "$font" ] && [ -n "$DISPLAY" ] && command -v xrdb >/dev/null 2>&1; then
+    font_name="$(xrdb -query 2>/dev/null \
+        | sed -n 's/^XTerm\*faceName:[[:space:]]*//p' | head -n 1)"
+    font_size="$(xrdb -query 2>/dev/null \
+        | sed -n 's/^XTerm\*faceSize:[[:space:]]*//p' | head -n 1)"
+    [ -n "$font_name" ] && font="$font_name"
+    [ -n "$font" ] && [ -n "$font_size" ] && font="$font $font_size"
+fi
+
 ## COLORS
 
 if [ -z "$NO_COLOR" ] && command -v tput >/dev/null 2>&1; then
@@ -226,18 +249,38 @@ c0="${reset}${bold}${blue}"     # logo
 
 session=""
 session_extra=""
+wm_label="$wm"
+wm_details="${display}"
+[ -n "$font" ] && [ -n "$wm_details" ] && wm_details="$wm_details, font: $font"
+[ -n "$font" ] && [ -z "$wm_details" ] && wm_details="font: $font"
+[ -n "$wm_details" ] && wm_label="$wm ($wm_details)"
 if [ -n "$de" ]; then
     session="${lc}de:        ${ic}${de}${reset}"
     [ -n "$wm" ] && session_extra="
-${c0}                 ${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
+${c0}                 ${lc}wm:        ${ic}${wm_label}${reset}"
 elif [ -n "$wm" ]; then
-    session="${lc}wm:        ${ic}${wm}${display:+ ($display)}${reset}"
+    session="${lc}wm:        ${ic}${wm_label}${reset}"
 fi
 
 header="${USER}@${host} (${model})"
 rule="$(printf '%*s' "${#header}" '' | tr ' ' '-')"
 
-cat <<EOF
+if [ "$minimal" -eq 1 ]; then
+    header="${USER}@${host}"
+    rule="$(printf '%*s' "${#header}" '' | tr ' ' '-')"
+    cat <<EOF
+
+${nc}${header}${reset}
+${c0}${rule}${reset}
+${lc}os:      ${ic}${os}${reset}
+${kernel:+${lc}kernel:  ${ic}${kernel}${reset}
+}${lc}uptime:  ${ic}${uptime_minimal}${reset}
+${lc}shell:   ${ic}${shell}${reset}
+${wm:+${lc}wm:      ${ic}${wm_label}${reset}}
+
+EOF
+else
+    cat <<EOF
 
 ${c0}                 ${nc}${header}${reset}
 ${c0}                 ${rule}${reset}
@@ -251,12 +294,13 @@ ${c0}  |____________  ${packages:+${lc}pkgs:      ${ic}${packages}${reset}}
 ${c0}                 ${session}${session_extra}
 
 EOF
+fi
 
 # Ensure terminal colors are fully reset
 [ -n "$reset" ] && printf '%s' "$reset"
 
 # Color palette aligned with labels
-if [ -z "$NO_COLOR" ]; then
+if [ -z "$NO_COLOR" ] && [ "$minimal" -eq 0 ]; then
     printf '               '
     for i in 0 1 2 3 4 5 6 7; do
         printf '\033[4%dm \033[0m' "$i"

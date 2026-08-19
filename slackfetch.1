@@ -6,6 +6,7 @@
 .Nd minimal system information utility for Slackware
 .Sh SYNOPSIS
 .Nm
+.Op Fl m
 .Sh DESCRIPTION
 .Nm
 displays a small set of system information relevant to a
@@ -19,6 +20,14 @@ It aims to remain simple, fast, and POSIX-compliant.
 .Pp
 Desktop environment and window manager fields are omitted
 when they cannot be determined.
+.Pp
+The minimal output mode omits the ASCII logo and displays only
+core system information.
+.Sh OPTIONS
+.Bl -tag -width Ds
+.It Fl m
+Use minimal output without the ASCII logo.
+.El
 .Sh INSTALLATION
 Local installation:
 .Bd -literal -offset indent
@@ -71,6 +80,11 @@ Cowsay output:
 $ NO_COLOR=1 slackfetch | cowsay -n
 .Ed
 .Pp
+Minimal output:
+.Bd -literal -offset indent
+$ slackfetch -m
+.Ed
+.Pp
 Override window manager detection:
 .Bd -literal -offset indent
 $ SLACKFETCH_WM="dwm 6.8" slackfetch
@@ -79,6 +93,11 @@ $ SLACKFETCH_WM="dwm 6.8" slackfetch
 Override machine model:
 .Bd -literal -offset indent
 $ SLACKFETCH_MODEL="QEMU" slackfetch
+.Ed
+.Pp
+Override the displayed font:
+.Bd -literal -offset indent
+$ SLACKFETCH_FONT="Ttyp0 OTB 14" slackfetch
 .Ed
 .Sh ENVIRONMENT
 .Bl -tag -width SLACKFETCH_MODEL
@@ -102,6 +121,16 @@ The value is shown verbatim.
 Example:
 .Bd -literal -offset indent
 SLACKFETCH_MODEL="QEMU" slackfetch
+.Ed
+.It Ev SLACKFETCH_FONT
+Override the displayed terminal font.
+When unset, slackfetch reads XTerm*faceName and XTerm*faceSize from
+.Xr xrdb 1 when an X11 display is available.
+The font field is omitted when no value can be determined.
+.Pp
+Example:
+.Bd -literal -offset indent
+SLACKFETCH_FONT="Ttyp0 OTB 14" slackfetch
 .Ed
 .It Ev NO_COLOR
 Disable colored output according to the
