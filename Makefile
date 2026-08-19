@@ -3,10 +3,7 @@ PREFIX=/usr/local
 BINDIR=$(PREFIX)/bin
 MANDIR=$(PREFIX)/share/man
 
-all: README
-
-README: slackfetch.1
-	man ./$< | col -bx > $@
+all:
 
 install:
 	mkdir -p $(DESTDIR)$(BINDIR)
