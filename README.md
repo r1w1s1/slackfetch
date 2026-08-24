@@ -76,6 +76,11 @@ The complete manual is available in [`slackfetch.1`](slackfetch.1):
 man ./slackfetch.1
 ```
 
+## Versioning
+
+This project follows [Semantic Versioning 2.0.0](https://semver.org/).
+Release tags use the `MAJOR.MINOR.PATCH` format.
+
 ## License
 
 This project follows the same BSD license terms as the original `ufetch`
