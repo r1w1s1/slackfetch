@@ -67,7 +67,6 @@ case "$uptime" in
         uptime="${uptime%, *}"
         ;;
 esac
-uptime_minimal="$uptime"
 
 libc=""
 for libc_file in /lib64/libc.so.6 /lib/libc.so.6; do
@@ -176,6 +175,7 @@ if [ -n "$birth" ] && [ "$birth" -gt 0 ] 2>/dev/null; then
     os_age="$(( ($(date +%s) - birth) / 86400 ))d"
 fi
 [ -n "$os_age" ] && uptime="$uptime (age $os_age)"
+uptime_minimal="$uptime"
 
 ## Machine Model
 
