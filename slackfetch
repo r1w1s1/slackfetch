@@ -63,7 +63,7 @@ hardware="$cpu"
 [ -n "$memory" ] && hardware="$hardware (mem: $memory)"
 uptime="$(uptime -p 2>/dev/null | sed 's/^up //')"
 case "$uptime" in
-    *day*,*\ minute*|*days*,*\ minute*)
+    *day*,*\ minute*)
         uptime="${uptime%, *}"
         ;;
 esac
@@ -131,7 +131,6 @@ esac
 ## WINDOW MANAGER
 
 wm=""
-wm_server=""
 
 # User override (for twm, mwm, etc.)
 if [ -n "$SLACKFETCH_WM" ]; then
@@ -144,7 +143,6 @@ elif [ -n "$DISPLAY" ] && command -v xprop >/dev/null 2>&1; then
     if [ -n "$wm_id" ] && [ "$wm_id" != "not" ]; then
         wm="$(xprop -id "$wm_id" _NET_WM_NAME 2>/dev/null \
             | sed -n 's/.*= "\(.*\)"/\1/p')"
-        [ -n "$wm" ] && wm_server="X11"
     fi
 fi
 
@@ -203,9 +201,11 @@ packages=""
 if [ -d /var/log/packages ]; then
     package_extra=""
     flatpak=""
-    total="$(ls /var/log/packages 2>/dev/null | wc -l | tr -d ' ')"
-    sbo="$(ls /var/log/packages 2>/dev/null | grep '_SBo$' | wc -l | tr -d ' ')"
-    unofficial="$(ls /var/log/packages 2>/dev/null | grep -vE '(-[0-9]+|_SBo)$' | wc -l | tr -d ' ')"
+    total="$(find -L /var/log/packages -mindepth 1 -maxdepth 1 -printf '.' | wc -c)"
+    sbo="$(find -L /var/log/packages -mindepth 1 -maxdepth 1 -printf '%f\n' |
+        grep -c '_SBo$')"
+    unofficial="$(find -L /var/log/packages -mindepth 1 -maxdepth 1 -printf '%f\n' |
+        grep -cvE '(-[0-9]+|_SBo)$')"
     if command -v flatpak >/dev/null 2>&1; then
         flatpak="$(flatpak list --app 2>/dev/null | wc -l | tr -d ' ')"
     fi
