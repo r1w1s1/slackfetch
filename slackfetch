@@ -222,7 +222,7 @@ if [ -d /var/log/packages ]; then
     [ -n "$package_extra" ] && packages="$packages ($package_extra)"
 fi
 
-## FONT
+## SESSION AND FONT
 font="$SLACKFETCH_FONT"
 if [ -z "$font" ] && [ -n "$DISPLAY" ] && command -v xrdb >/dev/null 2>&1; then
     font_name="$(xrdb -query 2>/dev/null \
@@ -231,6 +231,43 @@ if [ -z "$font" ] && [ -n "$DISPLAY" ] && command -v xrdb >/dev/null 2>&1; then
         | sed -n 's/^XTerm\*faceSize:[[:space:]]*//p' | head -n 1)"
     [ -n "$font_name" ] && font="$font_name"
     [ -n "$font" ] && [ -n "$font_size" ] && font="$font $font_size"
+fi
+
+tty_name=""
+tty_path="$(tty 2>/dev/null)"
+case "$tty_path" in
+    /dev/tty[0-9]|/dev/tty[0-9][0-9]) tty_name="${tty_path##*/}" ;;
+esac
+
+session_kind=""
+session_font=""
+if [ -n "$tty_name" ] && [ -z "$SSH_CONNECTION" ] &&
+   [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+    session_kind="console $tty_name"
+    session_font="$font"
+    if [ -z "$session_font" ] && [ -r /etc/default/rc.font ]; then
+        session_font="$(sed -n \
+            's/^[[:space:]]*FONT[[:space:]]*=[[:space:]]*//p' \
+            /etc/default/rc.font | head -n 1)"
+        session_font="${session_font#\"}"
+        session_font="${session_font%\"}"
+        session_font="${session_font#\'}"
+        session_font="${session_font%\'}"
+    fi
+elif [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+    session_kind="ssh"
+    case "$tty_path" in
+        /dev/*) session_kind="$session_kind ${tty_path#/dev/}" ;;
+        *)
+            case "$SSH_TTY" in
+                /dev/*) session_kind="$session_kind ${SSH_TTY#/dev/}" ;;
+            esac
+            ;;
+    esac
+elif [ -n "$wm" ]; then
+    session_kind="$wm"
+elif [ -n "$display" ]; then
+    session_kind="$display"
 fi
 
 ## COLORS
@@ -248,18 +285,26 @@ c0="${reset}${bold}${blue}"     # logo
 ## OUTPUT
 
 session=""
+session_minimal=""
 session_extra=""
 wm_label="$wm"
 wm_details="${display}"
 [ -n "$font" ] && [ -n "$wm_details" ] && wm_details="$wm_details, font: $font"
 [ -n "$font" ] && [ -z "$wm_details" ] && wm_details="font: $font"
 [ -n "$wm_details" ] && wm_label="$wm ($wm_details)"
+session_value="$session_kind"
+if [ -n "$wm" ] && [ -z "$SSH_CONNECTION" ] &&
+   [ -z "$SSH_CLIENT" ] && [ -z "$SSH_TTY" ]; then
+    session_value="$wm_label"
+fi
 if [ -n "$de" ]; then
     session="${lc}de:        ${ic}${de}${reset}"
-    [ -n "$wm" ] && session_extra="
-${c0}                 ${lc}wm:        ${ic}${wm_label}${reset}"
-elif [ -n "$wm" ]; then
-    session="${lc}wm:        ${ic}${wm_label}${reset}"
+    session_minimal="${lc}de: ${ic}${de}${reset}"
+    [ -n "$session_value" ] && session_extra="
+${c0}                 ${lc}session:   ${ic}${session_value}${session_font:+ (font: $session_font)}${reset}"
+elif [ -n "$session_value" ]; then
+    session="${lc}session:   ${ic}${session_value}${session_font:+ (font: $session_font)}${reset}"
+    session_minimal="${lc}session: ${ic}${session_value}${session_font:+ (font: $session_font)}${reset}"
 fi
 
 header="${USER}@${host} (${model})"
@@ -276,7 +321,7 @@ ${lc}os:      ${ic}${os}${reset}
 ${kernel:+${lc}kernel:  ${ic}${kernel}${reset}
 }${lc}uptime:  ${ic}${uptime_minimal}${reset}
 ${lc}shell:   ${ic}${shell}${reset}
-${wm:+${lc}wm:      ${ic}${wm_label}${reset}}
+${session_minimal}
 
 EOF
 else

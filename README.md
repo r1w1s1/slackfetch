@@ -12,7 +12,7 @@ determined reliably.
 - Kernel, architecture, CPU and memory information
 - libc and sysvinit versions
 - Installed Slackware, SBo, unofficial and Flatpak package counts
-- Desktop environment and window manager detection
+- Desktop environment, window manager, and session detection
 - X11/XLibre and Wayland information
 - Machine model detection with manual override support
 - POSIX shell implementation with no runtime dependencies
@@ -62,11 +62,18 @@ incomplete or inaccurate:
 SLACKFETCH_MODEL="QEMU" slackfetch
 ```
 
-The displayed font can be overridden when it cannot be detected from X11:
+The displayed font can be overridden when automatic font information is not
+available or when a different value should be shown:
 
 ```sh
 SLACKFETCH_FONT="Ttyp0 OTB 14" slackfetch
 ```
+
+The output uses a `session:` field for the active context. It reports the
+window manager and display server in X11, the local virtual console and its
+configured `/etc/default/rc.font` value, and the SSH terminal
+when running remotely. SSH does not transmit the client's display font, so
+the remote system's console font is not reported as the client's font.
 
 ## Documentation
 
